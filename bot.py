@@ -42,7 +42,11 @@ async def on_message(message):
 
     if message.content == '!drop':
         drop_event = await CardDropEventHandler.create_drop_event_random(3, message)
-        await drop_event.start()
+
+        if drop_event is not None:
+            await drop_event.start()
+        else:
+            await message.channel.send(f"{message.author.mention} There was an error initiating your Drop. Try again later.")
         return
     
     if message.content == "!inv":

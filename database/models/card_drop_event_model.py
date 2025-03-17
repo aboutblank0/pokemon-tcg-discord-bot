@@ -15,6 +15,6 @@ class CardDropEventModel(Base):
     def from_card_drop_event(cls, card_drop_event: CardDropEvent):
         return cls(
             id=card_drop_event.id,
-            cards_dropped_ids=[card.id for card in card_drop_event.all_cards],
+            cards_dropped_ids=[card.tcg_card.id for card in card_drop_event.dropped_cards],
             started_by_user_id = card_drop_event.owner_discord_id
         )

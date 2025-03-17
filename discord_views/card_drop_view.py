@@ -13,7 +13,7 @@ class CardDropView(discord.ui.View):
         self.drop_event = drop_event
         self.discord_channel = drop_event.discord_channel
 
-        for i, card in enumerate(drop_event.all_cards):
+        for i, card in enumerate(drop_event.dropped_cards):
             button = CardDropButtonView(card_index=i, drop_event=drop_event)
             self.add_item(button)
 
@@ -31,15 +31,15 @@ class CardDropView(discord.ui.View):
         expired_embed = discord.Embed(title="🎴 Drop has expired !", color=discord.Color.light_grey())
         expired_embed.set_image(url=f"attachment://{file_name}")
 
-        all_cards = self.drop_event.all_cards
+        all_cards = self.drop_event.dropped_cards
         claimed_cards = self.drop_event.claimed_cards
 
         formatted_text = ""
         for i, card in enumerate(all_cards):
             if claimed_cards[i] is not None:
-                formatted_text += f"✅ {card.name} was caught!\n"  # Checkmark for caught cards
+                formatted_text += f"✅ {card.tcg_card.name} was caught!\n"  # Checkmark for caught cards
             else:
-                formatted_text += f"❌ {card.name} was lost forever!\n"  # Cross for lost cards
+                formatted_text += f"❌ {card.tcg_card.name} was lost forever!\n"  # Cross for lost cards
 
         expired_embed.set_footer(text=formatted_text)
 
@@ -66,8 +66,8 @@ class CardDropButtonView(discord.ui.Button):
             return
 
         try:
-            tcg_card, user_card = await CardDropEventHandler.claim_card_at_index(self.drop_event, interaction.user.id, self.card_index)
-            await interaction.response.send_message(f"{interaction.user.mention} claimed **{tcg_card.name}**. Condition: `{CardUtil.get_float_as_condition(user_card.float_value)}` ID: `{to_base36(user_card.id)}`")
+            dropped_card = await CardDropEventHandler.claim_card_at_index(self.drop_event, interaction.user.id, self.card_index)
+            await interaction.response.send_message(f"{interaction.user.mention} claimed **{dropped_card.tcg_card.name}**. Condition: `{CardUtil.get_float_as_condition(dropped_card.user_card.float_value)}` ID: `{to_base36(dropped_card.user_card.id)}`")
         except Exception as e:
             print(e)
             await interaction.response.send_message(f"There was an error claiming your card. Try again.", ephemeral=True)
