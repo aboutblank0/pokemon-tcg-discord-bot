@@ -1,10 +1,6 @@
 import discord
 
-from database.models.user_card_model import UserCardModel
-from discord_views.card_drop_view import CardDropButtonView
-from drops.card_drop_event import CardDropEvent
-from schemas.pokemon_card_schema import PokemonTCGCardLoader
-from schemas.pokemon_card_set_schema import PokemonCardSetLoader
+from pokemon_tcg_loader import PokemonTCGLoader
 from database.managers.user_manager import UserManager
 from utils.id_utils import to_base36
 
@@ -28,8 +24,8 @@ class UserInventoryView(discord.ui.View):
         all_cards = await UserManager.get_all_user_cards(self.discord_user_id)
         formatted_text = ""
         for i, card in enumerate(all_cards):
-            tcg_card = PokemonTCGCardLoader.load_id(card.pokemon_tcg_card_id)
-            tcg_set = PokemonCardSetLoader.load_id(tcg_card.set)
+            tcg_card = PokemonTCGLoader.load_card_data(card.pokemon_tcg_card_id)
+            tcg_set = PokemonTCGLoader.load_set_data(tcg_card.set)
 
             formatted_text += f"`{to_base36(card.id)}`: {tcg_card.name} - **{tcg_set.name}** Float: `{card.float_value}` Pattern: `{card.pattern_number}`\n"
 

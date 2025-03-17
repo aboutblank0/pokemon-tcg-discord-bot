@@ -6,7 +6,6 @@ sys.path.append(PROJECT_ROOT)
 
 import argparse
 import json
-from pathlib import Path
 import requests
 from io import BytesIO
 from pokemontcgsdk import RestClient
@@ -21,9 +20,7 @@ from utils.file_utils import sanitize_filename
 load_dotenv()
 RestClient.configure(os.getenv("POKEMON_TCG_API_KEY"))
 
-# Define the data directory
 data_dir = os.path.join(PROJECT_ROOT, "pokemon_tcg_data")
-print(data_dir)
 
 def save_all_sets(force=False):
     all_sets = TCGSet.all()
@@ -54,12 +51,19 @@ def save_set_data(set: TCGSet, force=False):
     print(f"Saved {set.name} with ID: {set.id} successfully")
 
 def save_all_cards(force=False):
+    card_dict = {}
+
     page = 1
     while True:
         cards = TCGCard.where(page=page, pageSize=100)
+        print(card_dict)
 
         print(f"Will save the next {len(cards)} cards.") 
         for card in cards:
+            if card.set.id not in card_dict:
+                card_dict[card.set.id] = []
+            
+            card_dict[card.set.id].append(card.id)
             save_card_data(card, force)
 
         # If the number of cards returned is less than the page_size, stop.
@@ -68,6 +72,10 @@ def save_all_cards(force=False):
             break
         
         page += 1
+
+    card_dict_path = os.path.join(data_dir, "card_dict.json")
+    with open(card_dict_path, 'w') as file:
+        json.dump(card_dict, file, indent=2)
 
 
 def save_card_data(card: TCGCard, force=False):
@@ -132,48 +140,11 @@ def main():
     os.makedirs(data_dir, exist_ok=True)
 
     args = parser.parse_args()
-
+    
     save_all_sets(args.force)
     save_all_cards(args.force)  # Fetch and process all Pokémon
 
 if __name__ == "__main__":
     main()
 
-def load_pokemon_tcg_card_data(pokemon_tcg_card_id):
-    set_id = pokemon_tcg_card_id.split("-")[0]
-    file_name = sanitize_filename(f'{pokemon_tcg_card_id}.json')
-
-    card_file_path = os.path.join(data_dir, set_id)
-    card_file_path = os.path.join(card_file_path, file_name)
-
-    with open(card_file_path, 'r') as file:
-        card_data = json.load(file)
-        from schemas.pokemon_card_schema import PokemonCardSchema
-        return PokemonCardSchema.model_validate(card_data)
-
-    return None
-
-def load_pokemon_tcg_card_image(pokemon_tcg_card_id):
-    set_id = pokemon_tcg_card_id.split("-")[0]
-
-    set_folder = sanitize_filename(set_id)
-    file_name = sanitize_filename(f'{pokemon_tcg_card_id}.png')
-
-    image_file_path = os.path.join(data_dir, set_folder)
-    image_file_path = os.path.join(image_file_path, file_name)
-
-    return Image.open(image_file_path).convert('RGBA')
-
-def load_pokemon_tcg_set_data(pokemon_tcg_set_id):
-    file_name = sanitize_filename(f'{pokemon_tcg_set_id}.json')
-
-    set_folder = os.path.join(data_dir, pokemon_tcg_set_id)
-    set_file = os.path.join(set_folder, file_name)
-
-    with open(set_file, 'r') as file:
-        set_data = json.load(file)
-        from schemas.pokemon_card_set_schema import PokemonCardSetSchema
-        return PokemonCardSetSchema.model_validate(set_data)
-
-    return None
 

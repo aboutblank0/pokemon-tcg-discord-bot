@@ -7,7 +7,7 @@ import sys
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(ROOT_DIR)
 
-from schemas.pokemon_card_schema import PokemonTCGCardLoader
+from pokemon_tcg_loader import PokemonTCGLoader
 from PIL import Image
 
 def generate_seed(card_id, pattern_number):
@@ -109,7 +109,7 @@ def main():
         parser.error("torn_intensity must be between 0.00 and 1.00")
     
     # Load the card and convert to RGBA
-    card = PokemonTCGCardLoader.load_id(args.pokemon_tcg_id)
+    card = PokemonTCGLoader.load_card_data(args.pokemon_tcg_id)
     if not card:
         parser.error("no card matching provided id")
 

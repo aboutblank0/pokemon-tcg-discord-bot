@@ -7,14 +7,15 @@ from database.models.user_card_model import UserCardModel
 from database.models.user_model import UserModel
 from database.session import get_session
 from drops.card_drop_event import CardDropEvent
-from schemas.pokemon_card_schema import PokemonCardSchema, PokemonTCGCardLoader
+from pokemon_tcg_loader import PokemonTCGLoader
+from schemas.pokemon_card_schema import PokemonCardSchema
 from database.managers.user_manager import UserNotExistError
 
 
 class CardDropEventHandler:
     @staticmethod
     async def create_drop_event_random(card_amount: int, discord_message) -> CardDropEvent:
-        random_cards = [PokemonTCGCardLoader.random() for _ in range(card_amount)]
+        random_cards = [PokemonTCGLoader.get_random_card() for _ in range(card_amount)]
         event = CardDropEvent(random_cards, discord_message)
 
         async with get_session() as session:

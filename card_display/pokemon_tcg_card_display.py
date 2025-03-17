@@ -1,8 +1,8 @@
 from card_display.abstract_card_display import AbstractCardDisplay
 from PIL import Image
+from pokemon_tcg_loader import PokemonTCGLoader
 from schemas.pokemon_card_schema import PokemonCardSchema
 from scripts.image_generator import apply_pattern_damage, generate_seed
-from scripts.pokemon_tcg_saver import load_pokemon_tcg_card_image
 
 class PokemonTCGCardDisplay(AbstractCardDisplay):
     CARD_WIDTH = 240
@@ -13,7 +13,7 @@ class PokemonTCGCardDisplay(AbstractCardDisplay):
     
     def create_image(self):
         try:
-            image = load_pokemon_tcg_card_image(self.card.id)
+            image = PokemonTCGLoader.load_card_image(self.card.id)
             image = image.resize((self.CARD_WIDTH, self.CARD_HEIGHT))
             return image
         except Exception as e:

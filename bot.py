@@ -1,23 +1,23 @@
 import os
-from dotenv import load_dotenv
 import discord
 import logging
 from discord_views.card_view import CardView
 from discord_views.user_inventory_view import UserInventoryView
 from drops.card_drop_event_handler import CardDropEventHandler
-
 from database.managers.user_manager import UserManager
+from pokemon_tcg_loader import PokemonTCGLoader
+
+from dotenv import load_dotenv
+load_dotenv()
 
 # Load environment variables
-load_dotenv()
 discord_token = os.getenv('DISCORD_TOKEN')
-
-# This example requires the 'message_content' intent.
 intents = discord.Intents.default()
 intents.message_content = True
 intents.reactions = True
-
 client = discord.Client(intents=intents)
+
+PokemonTCGLoader.load_data()
 
 @client.event
 async def on_ready():
@@ -67,7 +67,6 @@ async def on_message(message):
             await message.channel.send("Please provide an ID after the !view command and nothing else")
         
         return
-
 
 
 # Log Handler

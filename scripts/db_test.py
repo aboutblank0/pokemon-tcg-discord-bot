@@ -10,12 +10,11 @@ sys.path.append(ROOT_DIR)
 
 from database.models.card_drop_event_model import CardDropEventModel
 from database.models.user_card_model import UserCardModel
-from utils.id_utils import to_base36
-
-
 from database.models.user_model import UserModel
+from schemas.pokemon_card_schema import PokemonCardSchema
+from pokemon_tcg_loader import PokemonTCGLoader
+from utils.id_utils import to_base36
 from database.session import get_session
-from schemas.pokemon_card_schema import PokemonCardSchema, PokemonTCGCardLoader
 
 async def create_user():
     async with get_session() as session:
@@ -29,7 +28,7 @@ async def get_user(id):
         return await session.get(UserModel, id)
 
 async def create_user_card(user: UserModel):
-    random_card: PokemonCardSchema = PokemonTCGCardLoader.random()
+    random_card: PokemonCardSchema = PokemonTCGLoader.get_random_card()
 
     drop_event_id = str(uuid.uuid4())
 
