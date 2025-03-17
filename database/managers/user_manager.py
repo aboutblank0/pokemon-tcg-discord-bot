@@ -42,6 +42,7 @@ class UserManager:
     async def get_user_cards(discord_user_id: int, amount: int, cursor: int = None):
         """
         Returns X amount of cards that the user has, paginated by cursor.
+        Also returns whether there are more cards after the returned set.
         """
         async with get_session() as session:
             query = select(UserCardModel).filter(UserCardModel.owner_id == discord_user_id)
@@ -50,19 +51,21 @@ class UserManager:
             if cursor:
                 query = query.filter(UserCardModel.id > cursor)
             
-            query = query.limit(amount)
-
-            # Execute the query
+            query = query.limit(amount + 1)  # Fetch one extra card to check for more
             result = await session.execute(query)
-
-            # Fetch the results as a list of UserCardModel instances
             user_cards = result.scalars().all()
 
-            # If there are results, return the cards and the ID of the last card as the new cursor
+            has_more = len(user_cards) > amount  # If we got more than `amount`, there's more data
+            
+            if has_more:
+                user_cards = user_cards[:amount]  # Trim to the requested amount
+            
+            # If there are results, return the cards, the last card's ID, and `has_more`
             if user_cards:
-                return user_cards, user_cards[-1].id  # Return the cards along with the last card's ID for pagination
+                return user_cards, user_cards[-1].id, has_more
 
-            return [], None  # No cards found, return empty list and None for the cursor
+            return [], None, False  # No cards found, return empty list, None cursor, and False for `has_more`
+
 
     @staticmethod
     async def get_user_card(base_36_id: str) -> UserCardModel:

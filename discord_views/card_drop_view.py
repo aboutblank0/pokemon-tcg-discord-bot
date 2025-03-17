@@ -49,11 +49,9 @@ class CardDropView(discord.ui.View):
 
 class CardDropButtonView(discord.ui.Button):
     def __init__(self, card_index: int, drop_event: CardDropEvent, *args, **kwargs):
-        # Initialize the button with the card's custom_id and other required arguments
-        emoji = REACTION_EMOJIS[card_index]  # Assuming REACTION_EMOJIS is predefined
-        custom_id = f"card_{card_index + 1}"
+        emoji = REACTION_EMOJIS[card_index]  
 
-        super().__init__(emoji=emoji, style=discord.ButtonStyle.grey, custom_id=custom_id, *args, **kwargs)
+        super().__init__(emoji=emoji, style=discord.ButtonStyle.grey, *args, **kwargs)
         
         self.card_index = card_index
         self.drop_event = drop_event
