@@ -56,14 +56,23 @@ def save_all_cards(force=False):
     page = 1
     while True:
         cards = TCGCard.where(page=page, pageSize=100)
-        print(card_dict)
 
         print(f"Will save the next {len(cards)} cards.") 
         for card in cards:
+            set_folder = os.path.join(data_dir, card.set.id)
+            valid_image = _save_card_sprite(card, set_folder, force)
+
+            # If there is no valid image, we don't want to have it as a possible drop.
+            # So don't add it to the dictionary
+            if not valid_image:
+                print(f"Skipping card: {card.id} as the cards image cannot be obtained properly.")
+                continue
+
             if card.set.id not in card_dict:
                 card_dict[card.set.id] = []
             
             card_dict[card.set.id].append(card.id)
+
             save_card_data(card, force)
 
         # If the number of cards returned is less than the page_size, stop.
@@ -80,9 +89,6 @@ def save_all_cards(force=False):
 
 def save_card_data(card: TCGCard, force=False):
     set_folder = os.path.join(data_dir, card.set.id)
-
-    # Save the images
-    _save_card_sprite(card, set_folder, force)
 
     save_data = {
         "id": card.id,
@@ -119,16 +125,19 @@ def _save_card_sprite(card: TCGCard, card_folder: str, force=False):
 
         if os.path.exists(image_path) and not force:
             print(f"Skipping Card Image with ID {card.id} ({card.name}) as it already exists at {image_path}")
-            return
+            return True
 
         try:
             img = Image.open(BytesIO(response.content))
             img.save(image_path)
+            return True
         except Exception as e:
             print(f"Error saving {card.name} for Card ID {card.id} Image Url: {image_url} Error: {e}")
+            return False
 
     except requests.exceptions.RequestException as e:
         print(f"Error downloading {card.name} for Card ID {card.id}: {e}")
+        return False
     
 
 def main():
