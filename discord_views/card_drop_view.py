@@ -1,4 +1,5 @@
 import discord
+from database.managers.user_manager import UserManager
 from drops.card_drop_event import CardDropEvent
 from drops.card_drop_event import CardDropEvent
 from drops.card_drop_event_handler import CardDropEventHandler
@@ -59,6 +60,8 @@ class CardDropButtonView(discord.ui.Button):
     async def callback(self, interaction: discord.Interaction):
         """Handle the button click and process the card claim."""
 
+        await UserManager.get_or_create(interaction.user.id)
+
         can_interact, error_message = CardDropEventHandler.can_user_claim_card(self.drop_event, interaction.user.id, self.card_index)
 
         if not can_interact:
@@ -67,7 +70,12 @@ class CardDropButtonView(discord.ui.Button):
 
         try:
             dropped_card = await CardDropEventHandler.claim_card_at_index(self.drop_event, interaction.user.id, self.card_index)
-            await interaction.response.send_message(f"{interaction.user.mention} claimed **{dropped_card.tcg_card.name}**. Condition: `{CardUtil.get_float_as_condition(dropped_card.user_card.float_value)}` ID: `{to_base36(dropped_card.user_card.id)}`")
+            await interaction.response.send_message(
+                f"{interaction.user.mention} claimed **{dropped_card.tcg_card.name}**. "
+                f"Condition: `{CardUtil.get_float_as_condition(dropped_card.user_card.float_value)}` "
+                f"ID: `{to_base36(dropped_card.user_card.id)}` "
+                f"Print number: `{dropped_card.user_card.print_number}`"
+            )
         except Exception as e:
             print(e)
             await interaction.response.send_message(f"There was an error claiming your card. Try again.", ephemeral=True)

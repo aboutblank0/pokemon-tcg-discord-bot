@@ -23,14 +23,7 @@ class UserInventoryView(discord.ui.View):
         cards, new_cursor, has_more = await UserManager.get_user_cards(self.discord_user_id, self.CARDS_PER_PAGE, self.cursors[self.page_index])
         self.cursors[1] = new_cursor
 
-        self.clear_items()
-
-        previous_button = InventoryPageNavigationButton(InventoryScrollDirection.BACK, self.page_index == 0)
-        page_button = discord.ui.Button(label=str(self.page_index + 1), disabled=True)
-        next_button = InventoryPageNavigationButton(InventoryScrollDirection.NEXT, not has_more)
-        self.add_item(previous_button)
-        self.add_item(page_button)
-        self.add_item(next_button)
+        self._refresh_items(has_more)
 
         embed = self._generate_inventory_embed(cards)
         self.discord_inventory_message = await self.discord_channel.send(embed=embed, view=self)
@@ -47,14 +40,7 @@ class UserInventoryView(discord.ui.View):
 
         embed = self._generate_inventory_embed(cards)
 
-        self.clear_items()
-
-        previous_button = InventoryPageNavigationButton(InventoryScrollDirection.BACK, self.page_index == 0)
-        page_button = discord.ui.Button(label=str(self.page_index + 1), disabled=True)
-        next_button = InventoryPageNavigationButton(InventoryScrollDirection.NEXT, not has_more)
-        self.add_item(previous_button)
-        self.add_item(page_button)
-        self.add_item(next_button)
+        self._refresh_items(has_more)
 
         await self.discord_inventory_message.edit(embed=embed, view=self)
 
@@ -74,6 +60,16 @@ class UserInventoryView(discord.ui.View):
         )
 
         return embed    
+    
+    def _refresh_items(self, has_more):
+        self.clear_items()
+
+        previous_button = InventoryPageNavigationButton(InventoryScrollDirection.BACK, self.page_index == 0)
+        page_button = discord.ui.Button(label=str(self.page_index + 1), disabled=True)
+        next_button = InventoryPageNavigationButton(InventoryScrollDirection.NEXT, not has_more)
+        self.add_item(previous_button)
+        self.add_item(page_button)
+        self.add_item(next_button)
 
 
 class InventoryPageNavigationButton(discord.ui.Button):
@@ -88,6 +84,7 @@ class InventoryPageNavigationButton(discord.ui.Button):
         super().__init__(label=label, style=discord.ButtonStyle.grey, disabled=disabled, *args, **kwargs)
 
     async def callback(self, interaction: discord.Interaction):
+        await UserManager.get_or_create(interaction.user.id)
         await self.view.navigate(self.direction)
         await interaction.response.defer()
     
