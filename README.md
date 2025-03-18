@@ -22,10 +22,12 @@ There are a million improvements/features/bug-fixes I could do but I am ready to
 
 ### Features
 
-- Configurable by modifying `bot_config.ini`
-- Drop 3 cards on a cooldown
+- Float and Pattern number modifying cards appearance
+- Print number for each card (depending on tcg id)
+- Drop 3 cards on a cooldown per user
+- User claiming cooldown
 - Persistent inventory
--
+- Configurable by modifying `bot_config.ini`
 
 ## Setup / Installation
 
