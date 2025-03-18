@@ -1,10 +1,11 @@
 import io
+from bot_config import BotConfig
 from drops.dropped_card import DroppedCard
 from PIL import Image
 
 class CardDropEvent:
-    DURATION_SECONDS = 60
-    OWNER_ONLY_DURATION_SECONDS = 5
+    DURATION_SECONDS = BotConfig.get_int("drop_event", "duration_seconds")
+    OWNER_ONLY_DURATION_SECONDS = BotConfig.get_int("drop_event", "owner_only_seconds")
 
     """
     Represents a single drop event.
