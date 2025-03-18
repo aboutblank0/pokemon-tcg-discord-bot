@@ -11,9 +11,6 @@ venv/
 ENV/
 .venv/
 
-# Alembic migration files (if you want to ignore migration scripts)
-versions/
-
 # Python environment files
 .env
 .envrc
