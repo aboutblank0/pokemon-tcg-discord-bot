@@ -50,14 +50,14 @@ def save_set_data(set: TCGSet, force=False):
     
     print(f"Saved {set.name} with ID: {set.id} successfully")
 
-def save_all_cards(force=False):
+def save_all_cards(force=False, page_offset=1):
     card_dict = {}
 
-    page = 1
+    page = page_offset
     while True:
         cards = TCGCard.where(page=page, pageSize=100)
 
-        print(f"Will save the next {len(cards)} cards.") 
+        print(f"Will save the next {len(cards)} cards. Current page: {page}") 
         for card in cards:
             set_folder = os.path.join(data_dir, card.set.id)
             valid_image = _save_card_sprite(card, set_folder, force)
@@ -143,6 +143,7 @@ def _save_card_sprite(card: TCGCard, card_folder: str, force=False):
 def main():
     parser = argparse.ArgumentParser(description="Download Pokémon Card data.")
     parser.add_argument("--force", action="store_true", help="Force the download of the Pokémon Card data.")
+    parser.add_argument("--page-offset", type=int, default=1, help="Offset to where to start fetching the pages.")
 
     # Create directories for storing data
     # Ensure the main directory exists
@@ -151,9 +152,7 @@ def main():
     args = parser.parse_args()
     
     save_all_sets(args.force)
-    save_all_cards(args.force)  # Fetch and process all Pokémon
+    save_all_cards(args.force, args.page_offset)  # Fetch and process all Pokémon
 
 if __name__ == "__main__":
     main()
-
-
