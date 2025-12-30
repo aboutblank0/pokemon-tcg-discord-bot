@@ -31,3 +31,5 @@ ENV/
 
 # Backup files
 *~ 
+
+lastPage.txt

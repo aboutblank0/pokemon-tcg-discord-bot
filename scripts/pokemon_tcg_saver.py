@@ -75,6 +75,10 @@ def save_all_cards(force=False, page_offset=1):
 
             save_card_data(card, force)
 
+        # save/update text file with latest page number
+        with open("lastPage.txt", "w") as file:
+            file.write(str(page))
+
         # If the number of cards returned is less than the page_size, stop.
         if len(cards) < 100:
             print("Finished saving all card data.")
